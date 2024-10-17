@@ -1,0 +1,69 @@
+@startuml
+
+interface Observateur {
+    void reagir()
+}
+
+class Pane
+class GridPane
+class VueStats extends Pane {
+    void reagir()
+}
+class VueMenu {
+    void reagir()
+}
+class VuePlateau extends GridPane{
+    void reagir()
+}
+class EcouteurCase {
+    int lig
+    int col
+    void handle(Event e)
+}
+class EcouteurObjectif {
+    void handle(Event e)
+}
+class EcouteurNouveau {
+    void handle(Event e)
+}
+class Label
+class Menu
+class MenuItem
+class Button
+interface EventHandler {
+    void handle(Event e)
+}
+
+class Jeu {
+    - int[][] cases
+    - int objectif
+    + void nouveau()
+    + void ajouterObservateur(Observateur obs)
+    + void notifierObservateurs()
+    + void jouer(int l, int c)
+    + int size()
+    + int getCase(int l, int c)
+    + int getNbGagnees()
+    + int getNbJouees()
+    + void setTaille(int taille)
+    + void setObjectif(int objectif)
+}
+
+VueStats ..|> Observateur
+VueMenu ..|> Observateur
+VuePlateau ..|> Observateur
+VueStats -- "1" Label
+VueMenu -- "1" Menu
+Menu -- "*" MenuItem
+Observateur "0..*" -- "1" Jeu
+MenuItem -- "*" EventHandler
+Button "*" -- VuePlateau
+Button -- "*" EventHandler
+Jeu "1" -- EcouteurCase
+Jeu "1" -- EcouteurObjectif
+Jeu "1" -- EcouteurNouveau
+EcouteurCase ..|> EventHandler
+EcouteurObjectif ..|> EventHandler
+EcouteurNouveau ..|> EventHandler
+
+@enduml
