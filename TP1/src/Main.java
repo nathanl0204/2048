@@ -19,6 +19,8 @@ public class Main extends Application {
 
         Scene scene = new Scene(root, 400, 400);
 
+        scene.getStylesheets().add(getClass().getResource("css/style.css").toExternalForm());
+
         primaryStage.setTitle("Jeu 2048");
         primaryStage.setScene(scene);
         primaryStage.show();

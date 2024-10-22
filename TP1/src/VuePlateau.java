@@ -1,10 +1,15 @@
 import javafx.scene.control.Button;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.geometry.Pos;
 import javafx.geometry.Insets;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.TextAlignment;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import javafx.application.Platform;
 
 public class VuePlateau extends HBox implements Observateur {
     private Jeu jeu;
@@ -22,6 +27,7 @@ public class VuePlateau extends HBox implements Observateur {
         plateau.setPadding(new Insets(10));
         plateau.setHgap(10);
         plateau.setVgap(10);
+        plateau.setStyle("-fx-background-color: #BBADA0; -fx-padding: 20px; -fx-border-radius: 10;");
 
         // Création des boutons de direction
         btnHaut = new Button("Haut");
@@ -34,6 +40,11 @@ public class VuePlateau extends HBox implements Observateur {
         btnBas.setPrefSize(60, 40);
         btnGauche.setPrefSize(60, 40);
         btnDroite.setPrefSize(60, 40);
+
+        btnHaut.setMinWidth(120);
+        btnBas.setMinWidth(120);
+        btnGauche.setMinWidth(120);
+        btnDroite.setMinWidth(120);
 
         // Écouteurs pour les boutons de direction
         btnHaut.setOnAction(new EcouteurCase(jeu, "haut"));
@@ -84,9 +95,34 @@ public class VuePlateau extends HBox implements Observateur {
                     btn.setText(""); // Vide si la case est 0
                 }
 
+                // Définir les couleurs des cases en fonction de leur valeur
+                String couleur = getColorForValue(valeur);
+                btn.setStyle("-fx-background-color: " + couleur + "; -fx-border-color: #BBADA0; -fx-border-width: 2px");
+
+                btn.setFont(Font.font("Arial", FontWeight.BOLD, 24)); // Police du texte
+                btn.setTextAlignment(TextAlignment.CENTER);
+
                 // Ajouter la case au plateau
                 plateau.add(btn, j, i);
             }
+        }
+    }
+
+    // Méthode pour gérer les couleurs des cases en fonction de leur valeur
+    private String getColorForValue(int valeur) {
+        switch (valeur) {
+            case 2: return "#EEE4DA";
+            case 4: return "#EDE0C8";
+            case 8: return "#F2B179";
+            case 16: return "#F59563";
+            case 32: return "#F67C5F";
+            case 64: return "#F65E3B";
+            case 128: return "#EDCF72";
+            case 256: return "#EDCC61";
+            case 512: return "#EDC850";
+            case 1024: return "#EDC53F";
+            case 2048: return "#EDC22E";
+            default: return "#3C3A32"; // Couleur pour valeurs supérieures à 2048
         }
     }
 
@@ -94,5 +130,19 @@ public class VuePlateau extends HBox implements Observateur {
     public void reagir() {
         // Lorsque le modèle notifie un changement, reconstruire le plateau
         construirePlateau();
+    }
+
+    // Méthode pour afficher un message de défaite
+    @Override
+    public void defaite() {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle("Défaite");
+        alert.setHeaderText("Partie terminée !");
+        alert.setContentText("Aucun mouvement possible, vous avez perdu !");
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                Platform.exit();
+            }
+        });
     }
 }

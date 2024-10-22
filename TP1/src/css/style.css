@@ -1,0 +1,24 @@
+.button {
+    -fx-font-size: 22px;
+    -fx-border-width: 2px;
+    -fx-border-color: #BBB;
+    -fx-text-fill: #776e65;
+    -fx-background-radius: 10px; /* Coins arrondis */
+}
+
+.button:empty {
+    -fx-background-color: #CDC1B4;
+}
+
+.menu-bar {
+    -fx-background-color: #BBADA0;
+    -fx-font-size: 18px;
+    -fx-padding: 10px;
+}
+
+.grid-pane {
+    -fx-background-color: #BBADA0;
+    -fx-padding: 10px;
+    -fx-hgap: 10px;
+    -fx-vgap: 10px;
+}

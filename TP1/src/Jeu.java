@@ -61,8 +61,14 @@ public class Jeu {
                 deplacerDroite();
                 break;
         }
-        ajouterNouvelleTuile();
-        notifierObservateurs();
+
+        if (verifierDefaite()) {
+            // Notifier les observateurs que la partie est perdue
+            notifierDefaite();
+        } else {
+            ajouterNouvelleTuile();
+            notifierObservateurs();
+        }
     }
 
     public int size() {
@@ -100,15 +106,17 @@ public class Jeu {
 
     // Mouvement vers le bas
     private void deplacerBas() {
-        for (int col = 0; col < cases[0].length; col++) {
-            int[] colonne = new int[cases.length];
-            for (int lig = 0; lig < cases.length; lig++) {
-                colonne[lig] = cases[lig][col];
+        for (int col = 0; col < taille; col++) {
+            int[] colonne = new int[taille];
+            int k = taille - 1;
+            for (int row = taille - 1; row >= 0; row--) {
+                if (cases[row][col] != 0) {
+                    colonne[k--] = cases[row][col];
+                }
             }
             fusionnerColonneVersBas(colonne);
-            decalerColonneVersBas(colonne);
-            for (int lig = 0; lig < cases.length; lig++) {
-                cases[lig][col] = colonne[lig];
+            for (int row = 0; row < taille; row++) {
+                cases[row][col] = colonne[row];
             }
         }
     }
@@ -132,12 +140,17 @@ public class Jeu {
 
     // Mouvement vers la droite
     private void deplacerDroite() {
-        for (int lig = 0; lig < cases.length; lig++) {
-            int[] ligne = cases[lig];
+        for (int row = 0; row < taille; row++) {
+            int[] ligne = new int[taille];
+            int k = taille - 1;
+            for (int col = taille - 1; col >= 0; col--) {
+                if (cases[row][col] != 0) {
+                    ligne[k--] = cases[row][col];
+                }
+            }
             fusionnerLigneVersDroite(ligne);
-            decalerLigneVersDroite(ligne);
-            for (int col = 0; col < ligne.length; col++) {
-                cases[lig][col] = ligne[col];
+            for (int col = 0; col < taille; col++) {
+                cases[row][col] = ligne[col];
             }
         }
     }
@@ -169,19 +182,10 @@ public class Jeu {
             if (colonne[i] != 0 && colonne[i] == colonne[i-1]) {
                 colonne[i] *= 2;
                 colonne[i-1] = 0;
+                nbGagnees += (colonne[i] == objectif) ? 1 : 0;
             }
         }
-    }
-
-    private void decalerColonneVersBas(int[] colonne) {
-        int[] nouvelleColonne = new int[colonne.length];
-        int index = colonne.length - 1;
-        for (int i = colonne.length - 1; i >= 0; i--) {
-            if (colonne[i] != 0) {
-                nouvelleColonne[index--] = colonne[i];
-            }
-        }
-        System.arraycopy(nouvelleColonne, 0, colonne, 0, colonne.length);
+        compacterColonneVersBas(colonne);
     }
 
     private void fusionnerLigneVersDroite(int[] ligne) {
@@ -189,20 +193,34 @@ public class Jeu {
             if (ligne[i] != 0 && ligne[i] == ligne[i-1]) {
                 ligne[i] *= 2;
                 ligne[i-1] = 0;
+                nbGagnees += (ligne[i] == objectif) ? 1 : 0;
             }
         }
+        compacterLigneVersDroite(ligne);
     }
 
-    private void decalerLigneVersDroite(int[] ligne) {
+    private void compacterColonneVersBas(int[] colonne) {
+        int[] nouvelleColonne = new int[colonne.length];
+        int k = colonne.length - 1;
+        for (int i = colonne.length - 1; i >= 0; i--) {
+            if (colonne[i] != 0) {
+                nouvelleColonne[k--] = colonne[i];
+            }
+        }
+        System.arraycopy(nouvelleColonne, 0, colonne, 0, colonne.length);
+    }
+
+    private void compacterLigneVersDroite(int[] ligne) {
         int[] nouvelleLigne = new int[ligne.length];
-        int index = ligne.length - 1;
+        int k = ligne.length - 1;
         for (int i = ligne.length - 1; i >= 0; i--) {
             if (ligne[i] != 0) {
-                nouvelleLigne[index--] = ligne[i];
+                nouvelleLigne[k--] = ligne[i];
             }
         }
         System.arraycopy(nouvelleLigne, 0, ligne, 0, ligne.length);
     }
+
 
     // Ajoute une nouvelle tuile (2 ou 4) à un emplacement vide
     private void ajouterNouvelleTuile() {
@@ -218,6 +236,40 @@ public class Jeu {
         if (!positionsVides.isEmpty()) {
             int[] position = positionsVides.get((int) (Math.random() * positionsVides.size()));
             cases[position[0]][position[1]] = Math.random() < 0.9 ? 2 : 4; // 90% de chance de générer un 2, 10% un 4
+        }
+    }
+
+    public boolean verifierDefaite() {
+        // Vérifier s'il y a encore des cases vides
+        for (int i = 0; i < taille; i++) {
+            for (int j = 0; j < taille; j++) {
+                if (cases[i][j] == 0) {
+                    return false; // Il reste des cases vides, donc pas de défaite
+                }
+            }
+        }
+
+        // Vérifier les mouvements possibles (fusion)
+        for (int i = 0; i < taille; i++) {
+            for (int j = 0; j < taille; j++) {
+                // Vérifier la case à droite
+                if (j < taille - 1 && cases[i][j] == cases[i][j + 1]) {
+                    return false; // Une fusion est possible à droite
+                }
+                // Vérifier la case en dessous
+                if (i < taille - 1 && cases[i][j] == cases[i + 1][j]) {
+                    return false; // Une fusion est possible en bas
+                }
+            }
+        }
+
+        // Si aucune case vide et aucun mouvement possible, c'est la défaite
+        return true;
+    }
+
+    private void notifierDefaite() {
+        for (Observateur obs : observateurs) {
+            obs.defaite();
         }
     }
 }

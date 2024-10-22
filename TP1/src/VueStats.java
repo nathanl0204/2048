@@ -16,4 +16,9 @@ public class VueStats extends Pane implements Observateur {
     public void reagir() {
         statsLabel.setText("Parties jouées : " + jeu.getNbJouees() + " | Parties gagnées : " + jeu.getNbGagnees());
     }
+
+    @Override
+    public void defaite() {
+        // Aucune action nécessaire ici
+    }
 }
