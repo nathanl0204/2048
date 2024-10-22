@@ -100,17 +100,15 @@ public class Jeu {
 
     // Mouvement vers le bas
     private void deplacerBas() {
-        for (int col = 0; col < taille; col++) {
-            int[] colonne = new int[taille];
-            int k = taille - 1;
-            for (int row = taille - 1; row >= 0; row--) {
-                if (cases[row][col] != 0) {
-                    colonne[k--] = cases[row][col];
-                }
+        for (int col = 0; col < cases[0].length; col++) {
+            int[] colonne = new int[cases.length];
+            for (int lig = 0; lig < cases.length; lig++) {
+                colonne[lig] = cases[lig][col];
             }
-            fusionner(colonne);
-            for (int row = 0; row < taille; row++) {
-                cases[row][col] = colonne[row];
+            fusionnerColonneVersBas(colonne);
+            decalerColonneVersBas(colonne);
+            for (int lig = 0; lig < cases.length; lig++) {
+                cases[lig][col] = colonne[lig];
             }
         }
     }
@@ -134,17 +132,12 @@ public class Jeu {
 
     // Mouvement vers la droite
     private void deplacerDroite() {
-        for (int row = 0; row < taille; row++) {
-            int[] ligne = new int[taille];
-            int k = taille - 1;
-            for (int col = taille - 1; col >= 0; col--) {
-                if (cases[row][col] != 0) {
-                    ligne[k--] = cases[row][col];
-                }
-            }
-            fusionner(ligne);
-            for (int col = 0; col < taille; col++) {
-                cases[row][col] = ligne[col];
+        for (int lig = 0; lig < cases.length; lig++) {
+            int[] ligne = cases[lig];
+            fusionnerLigneVersDroite(ligne);
+            decalerLigneVersDroite(ligne);
+            for (int col = 0; col < ligne.length; col++) {
+                cases[lig][col] = ligne[col];
             }
         }
     }
@@ -169,6 +162,46 @@ public class Jeu {
         }
 
         System.arraycopy(compactee, 0, ligne, 0, taille);
+    }
+
+    private void fusionnerColonneVersBas(int[] colonne) {
+        for (int i = colonne.length - 1; i > 0; i--) {
+            if (colonne[i] != 0 && colonne[i] == colonne[i-1]) {
+                colonne[i] *= 2;
+                colonne[i-1] = 0;
+            }
+        }
+    }
+
+    private void decalerColonneVersBas(int[] colonne) {
+        int[] nouvelleColonne = new int[colonne.length];
+        int index = colonne.length - 1;
+        for (int i = colonne.length - 1; i >= 0; i--) {
+            if (colonne[i] != 0) {
+                nouvelleColonne[index--] = colonne[i];
+            }
+        }
+        System.arraycopy(nouvelleColonne, 0, colonne, 0, colonne.length);
+    }
+
+    private void fusionnerLigneVersDroite(int[] ligne) {
+        for (int i = ligne.length - 1; i > 0; i--) {
+            if (ligne[i] != 0 && ligne[i] == ligne[i-1]) {
+                ligne[i] *= 2;
+                ligne[i-1] = 0;
+            }
+        }
+    }
+
+    private void decalerLigneVersDroite(int[] ligne) {
+        int[] nouvelleLigne = new int[ligne.length];
+        int index = ligne.length - 1;
+        for (int i = ligne.length - 1; i >= 0; i--) {
+            if (ligne[i] != 0) {
+                nouvelleLigne[index--] = ligne[i];
+            }
+        }
+        System.arraycopy(nouvelleLigne, 0, ligne, 0, ligne.length);
     }
 
     // Ajoute une nouvelle tuile (2 ou 4) à un emplacement vide
